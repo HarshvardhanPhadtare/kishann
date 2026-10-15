@@ -43,28 +43,31 @@ jobs:
         uses: actions/deploy-pages@v5
 
         
+ 
   health-monitor:
     name: Basic Health Monitoring
     runs-on: ubuntu-latest
-    needs: [frontend, backend]
+    needs: [deploy]
     if: always()
 
     steps:
       - name: Check project health
         env:
-          FRONTEND_STATUS: ${{ needs.frontend.result }}
-          BACKEND_STATUS: ${{ needs.backend.result }}
+          DEPLOY_STATUS: ${{ needs.deploy.result }}
         run: |
           echo "================================"
-          echo "     PROJECT HEALTH CHECK"
+          echo "    KISANBAZAAR MONITORING"
           echo "================================"
 
-          if [ "$FRONTEND_STATUS" = "success" ] && [ "$BACKEND_STATUS" = "success" ]; then
+          if [ "$DEPLOY_STATUS" = "success" ]; then
             echo "STATUS: HEALTHY"
-            echo "All CI checks passed."
+            echo "Deployment completed successfully."
+            echo "### HEALTHY - Deployment successful" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "STATUS: UNHEALTHY"
-            echo "One or more CI checks failed."
+            echo "Deployment failed or was cancelled."
+            echo "### UNHEALTHY - Deployment failed" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
 
